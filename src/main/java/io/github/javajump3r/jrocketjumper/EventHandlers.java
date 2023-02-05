@@ -1,8 +1,10 @@
 package io.github.javajump3r.jrocketjumper;
 
+import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
@@ -18,53 +20,49 @@ import java.util.Collection;
 
 public class EventHandlers implements Listener {
     @EventHandler
-    void onFireworkExplode(FireworkExplodeEvent event){
+    void onFireworkExplode(FireworkExplodeEvent event) {
+        Config config = JRocketJumper.config;
+
         Firework firework = event.getEntity();
 
         Vector fireworkPos = firework.getLocation().toVector();
         BoundingBox box = new BoundingBox(fireworkPos.getX(), fireworkPos.getY(), fireworkPos.getZ(), fireworkPos.getX(), fireworkPos.getY(), fireworkPos.getZ());
         box.expand(16);
-        Util.outlineBox(box, firework.getWorld());
+        fireworkPos = fireworkPos.add(new Vector(0,config.boostYOffset,0));
 
-        Collection<Entity> affectedEntities = firework.getWorld().getNearbyEntities(fireworkPos.toLocation(firework.getWorld()),16,16,16);
-        for(Entity entity : affectedEntities)
-        {
-            Config config = JRocketJumper.config;
-            if(entity instanceof Firework)
+        Collection<Entity> affectedEntities = firework.getNearbyEntities(32, 32, 32);
+        for (Entity entity : affectedEntities) {
+            if (entity instanceof Firework)
                 return;
-            if(entity instanceof Player) {
+            if (entity instanceof Player) {
                 if (((Player) entity).getGameMode() == GameMode.SPECTATOR)
                     return;
             }
-            Vector entityPos = entity.getLocation().toVector();
             Vector entityVelocity = entity.getVelocity();
-            /*entityVelocity = new Vector(
+            entityVelocity = new Vector(
                     entityVelocity.getX(),
                     Math.min(
                             1.0,
                             Math.abs(entityVelocity.getY())
                     ),
-            entityVelocity.getZ());*/
-            Vector direction = entityPos.subtract(fireworkPos).normalize();
+                    entityVelocity.getZ());
+            Vector direction = entity.getLocation().toVector().subtract(fireworkPos).normalize();
             Vector addVelocity = direction;
 
-            double entityTypeMultiplier=1;
-            if(entity instanceof Player){
+            double entityTypeMultiplier;
+            if (entity instanceof Player) {
                 entityTypeMultiplier = config.playerMultiplier;
-            }
-            else if(entity instanceof LivingEntity)
-            {
+            } else if (entity instanceof LivingEntity) {
                 entityTypeMultiplier = config.livingEntityMultiplier;
-            }
-            else {
+            } else {
                 entityTypeMultiplier = config.otherEntityMultiplier;
             }
 
-            double distance = entityPos.distance(fireworkPos);
-            double distanceMultiplier=Util.calculatePower(config,distance);
+            double distance = entity.getLocation().toVector().distance(fireworkPos);
+            double distanceMultiplier = Util.calculatePower(config, distance);
 
             FireworkMeta fireworkMeta = firework.getFireworkMeta();
-            double starCountMultiplier = fireworkMeta.getEffectsSize()*0.4;
+            double starCountMultiplier = fireworkMeta.getEffectsSize() * config.perStarMultiplier;
 
             addVelocity = addVelocity
                     .multiply(entityTypeMultiplier)
@@ -72,21 +70,20 @@ public class EventHandlers implements Listener {
                     .multiply(distanceMultiplier);
 
             entityVelocity = entityVelocity.add(addVelocity);
-            String debugText = "";
-            debugText += " "+entity.getName();
-            debugText += " "+entity.getLocation().toVector();
-            debugText += " "+entity.getLocation();
-            /*debugText += " "+String.format("entTypeMp: %.2f, starMp: %.2f, distanceMp: %.2f, distance %.2f, addVelocity: %s",
-                    entityTypeMultiplier,
-                    starCountMultiplier,
-                    distanceMultiplier,
-                    distance,
-                    addVelocity);*/
-            //debugText += " " + String.format("ent: %s, firework: %s, dir: %s, distance %.2f",entityPos,fireworkPos,direction,distance);
-            Bukkit.getServer().sendMessage(Component.text(debugText));
-            JRocketJumper.logger.info(debugText);
-            if(addVelocity.length()>0.01)
-            entity.setVelocity(entityVelocity);
+            if (addVelocity.length() > 0.01) {
+                entity.setVelocity(entityVelocity);
+            }
+        }
+    }
+    @EventHandler
+    void onPlayerElytraBoost(PlayerElytraBoostEvent event){
+        Config config = JRocketJumper.config;
+        if(config.disableVanillaBoost)
+        {
+            event.setCancelled(true);
+            if(config.sendDisableVanillaBoostMessage){
+                event.getPlayer().sendMessage(Component.text(config.disableVanillaBoostMessage));
+            }
         }
     }
 }

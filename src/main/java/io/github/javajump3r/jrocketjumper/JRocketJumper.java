@@ -9,31 +9,31 @@ import org.checkerframework.checker.units.qual.C;
 import java.io.File;
 import java.util.logging.Logger;
 public final class JRocketJumper extends JavaPlugin{
-    static private JRocketJumper instance;
-    static JRocketJumper getInstance(){
-        return instance;
-    }
     static public Config config = new Config();
     private static Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
     static Logger logger;
     @Override
     public void onEnable() {
-        instance=this;
-        // Plugin startup logic
-        //restoreConfig();
-        getLogger().info("JRocketJumper init");
+        restoreConfig();
         logger = getLogger();
         getServer().getPluginManager().registerEvents(new EventHandlers(),this);
+        getLogger().info("JRocketJumper initialized");
     }
     public void restoreConfig(){
-        File dataFolder = getDataFolder();
-        File configFile = dataFolder.toPath().resolve("jrjconfig.json").toFile();
-        try{
-            //config = prettyGson.fromJson(FileReadWrite.readJson(configFile), Config.class);
+        try {
+            File dataFolder = getDataFolder();
+            File configFile = dataFolder.toPath().resolve("jrjconfig.json").toFile();
+            if(!configFile.exists())
+                FileReadWrite.write(configFile,"~");
+            try {
+                config = prettyGson.fromJson(FileReadWrite.read(configFile), Config.class);
+            } catch (JsonSyntaxException exception) {
+                FileReadWrite.write(configFile, prettyGson.toJson(new Config()));
+                restoreConfig();
+            }
         }
-        catch (JsonSyntaxException exception){
-            //FileReadWrite.write(configFile,prettyGson.toJson(new Config()));
-            restoreConfig();
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
     @Override

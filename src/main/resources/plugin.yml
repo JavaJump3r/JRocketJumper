@@ -1,0 +1,7 @@
+name: JRocketJumper
+version: '${project.version}'
+main: io.github.javajump3r.jrocketjumper.JRocketJumper
+api-version: 1.19
+prefix: JRocketJumper
+authors: [ JavaJumper ]
+website: javajump3r.github.io

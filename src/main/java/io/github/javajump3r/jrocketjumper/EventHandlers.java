@@ -2,9 +2,8 @@ package io.github.javajump3r.jrocketjumper;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
@@ -22,7 +21,6 @@ public class EventHandlers implements Listener {
     @EventHandler
     void onFireworkExplode(FireworkExplodeEvent event) {
         Config config = JRocketJumper.config;
-
         Firework firework = event.getEntity();
 
         Vector fireworkPos = firework.getLocation().toVector();
@@ -51,7 +49,10 @@ public class EventHandlers implements Listener {
 
             double entityTypeMultiplier;
             if (entity instanceof Player) {
-                entityTypeMultiplier = config.playerMultiplier;
+                if(entity.getUniqueId()==firework.getSpawningEntity())
+                    entityTypeMultiplier = config.thisPlayerMultiplier;
+                else
+                    entityTypeMultiplier = config.otherPlayerMultiplier;
             } else if (entity instanceof LivingEntity) {
                 entityTypeMultiplier = config.livingEntityMultiplier;
             } else {

@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.logging.Logger;
 public final class JRocketJumper extends JavaPlugin{
     static public Config config = new Config();
-    private static Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+    public static Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
     static Logger logger;
     @Override
     public void onEnable() {

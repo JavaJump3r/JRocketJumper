@@ -18,6 +18,6 @@ public class Config {
     public ElytraExplosionBoostMode elytraExplosionBoostMode = ElytraExplosionBoostMode.IMMEDIATE_EXPLOSION;
     public double k=-1;
     public double b=5;
-
     public double entitySearchRadius=16;
+
 }

@@ -20,4 +20,5 @@ public class Config {
     public double b=5;
     public double entitySearchRadius=16;
 
+    public double damageMultiplier=0.5;
 }

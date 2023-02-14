@@ -66,14 +66,15 @@ public class EventHandlers implements Listener {
         }
 
         if(config.elytraExplosionBoostMode == ElytraExplosionBoostMode.IMMEDIATE_EXPLOSION){
-            Firework firework = event.getFirework();
-            Player player = event.getPlayer();
-            Vector pos = player.getLocation().getDirection().normalize().multiply(-1*config.explosionBoostDistance);
-            pos.add(player.getLocation().toVector());
-            Location newFireworkPos = pos.toLocation(firework.getWorld());
-            firework.teleport(newFireworkPos);
-            firework.detonate();
-            ;
+            if(event.getFirework().getFireworkMeta().getEffectsSize()!=0) {
+                Firework firework = event.getFirework();
+                Player player = event.getPlayer();
+                Vector pos = player.getLocation().getDirection().normalize().multiply(-1 * config.explosionBoostDistance);
+                pos.add(player.getLocation().toVector());
+                Location newFireworkPos = pos.toLocation(firework.getWorld());
+                firework.teleport(newFireworkPos);
+                firework.detonate();
+            }
         }
     }
     @EventHandler
